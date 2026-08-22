@@ -385,7 +385,7 @@ namespace ICSharpCode.ILSpy.Search
 			if (assemblyList == null || language == null)
 			{ IsSearching = false; return; }
 			var settings = AppComposition.TryGetExport<SettingsService>();
-			var run = new RunningSearch(assemblyList.GetAssemblies(), term, SearchMode.TypeAndMember, language,
+			var run = new RunningSearch(assemblyList, term, SearchMode.TypeAndMember, language,
 				settings?.SessionSettings?.LanguageSettings?.ShowApiLevel ?? ApiVisibility.PublicOnly,
 				new AvaloniaSearchResultFactory(language), Results,
 				(settings?.DisplaySettings.SortResults ?? true) ? SearchResult.ComparerByFitness : SearchResult.ComparerByName);
@@ -393,6 +393,7 @@ namespace ICSharpCode.ILSpy.Search
 			currentSearch = run;
 			IsSearching = true;
 			run.Start();
+		}
 		// The composition container is the only owner and disposes this model with itself. A search
 		// still in flight at that point owns a dispatcher timer and keeps IsSearching (and with it the
 		// pane's indeterminate progress animation) on; both would otherwise outlive the container.
