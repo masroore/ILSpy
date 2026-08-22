@@ -140,6 +140,7 @@ namespace ICSharpCode.ILSpy.AI
 					if (conversation.Target is null)
 						conversation.ReadOnly = true;
 				}
+				CollapseDuplicateWritableConversations(history);
 				if (!history.TrySelect(history.ActiveConversationId))
 					history.ActiveConversationId = history.Conversations.FirstOrDefault()?.Id ?? string.Empty;
 				return history;
@@ -165,6 +166,34 @@ namespace ICSharpCode.ILSpy.AI
 			legacy.Conversations.Add(legacyConversation);
 			legacy.ActiveConversationId = legacyConversation.Id;
 			return legacy;
+		}
+
+		static void CollapseDuplicateWritableConversations(ChatHistory history)
+		{
+			var canonical = new Dictionary<(string ProfileId, string ProviderType, string Endpoint, string Model), ChatConversation>();
+			var merged = new List<ChatConversation>(history.Conversations.Count);
+			foreach (ChatConversation conversation in history.Conversations)
+			{
+				AIConversationTarget? target = conversation.Target;
+				if (conversation.ReadOnly || target is null)
+				{
+					merged.Add(conversation);
+					continue;
+				}
+
+				var key = (target.ProfileId, target.ProviderType, target.Endpoint, target.Model.ToUpperInvariant());
+				if (!canonical.TryGetValue(key, out ChatConversation? existing))
+				{
+					canonical.Add(key, conversation);
+					merged.Add(conversation);
+					continue;
+				}
+
+				existing.Messages.AddRange(conversation.Messages);
+				if (history.ActiveConversationId == conversation.Id)
+					history.ActiveConversationId = existing.Id;
+			}
+			history.Conversations = merged;
 		}
 
 		public void Save(string path)

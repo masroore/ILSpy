@@ -128,6 +128,30 @@ namespace ICSharpCode.ILSpy.AI.Tests.AI
 		}
 
 		[Test]
+		public void Load_CollapsesDuplicateWritableTargets()
+		{
+			string path = Path.Combine(Path.GetTempPath(), "ilspy-chat-duplicates-" + Guid.NewGuid() + ".json");
+			try
+			{
+				var history = new ChatHistory();
+				var target = new AIConversationTarget("p1", "Work", "openai", "https://api.example", "model");
+				ChatConversation first = history.StartNew(target);
+				first.Messages.Add(new ChatMessage { Role = "user", Content = "first" });
+				ChatConversation second = history.StartNew(target with { ProfileName = "Renamed" });
+				second.Messages.Add(new ChatMessage { Role = "assistant", Content = "second" });
+				history.Save(path);
+
+				ChatHistory loaded = ChatHistory.Load(path);
+
+				Assert.That(loaded.Conversations, Has.Count.EqualTo(1));
+				Assert.That(loaded.Messages, Has.Count.EqualTo(2));
+				Assert.That(loaded.Messages[0].Content, Is.EqualTo("first"));
+				Assert.That(loaded.Messages[1].Content, Is.EqualTo("second"));
+			}
+			finally { if (File.Exists(path)) File.Delete(path); }
+		}
+
+		[Test]
 		public void UnknownTargetConversation_IsForcedReadOnlyOnLoad()
 		{
 			string path = Path.Combine(Path.GetTempPath(), "ilspy-chat-unknown-" + Guid.NewGuid() + ".json");
