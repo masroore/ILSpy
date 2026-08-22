@@ -65,12 +65,13 @@ namespace ICSharpCode.ILSpy.AI
 			if (e.NewItems is not null)
 				foreach (ChatMessage message in e.NewItems)
 					message.PropertyChanged += OnMessagePropertyChanged;
-			ScheduleRestore();
+			if (followTail.IsFollowingTail)
+				ScheduleRestore();
 		}
 
 		void OnMessagePropertyChanged(object? sender, PropertyChangedEventArgs e)
 		{
-			if (e.PropertyName == nameof(ChatMessage.Content))
+			if (e.PropertyName == nameof(ChatMessage.Content) && followTail.IsFollowingTail)
 				ScheduleRestore();
 		}
 
