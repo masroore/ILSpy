@@ -132,7 +132,7 @@ namespace ICSharpCode.ILSpy.AI.Tests.AI
 
 		private static string GetPromptsDirectory()
 		{
-			return Path.Combine(Path.GetDirectoryName(typeof(AIPromptProvider).Assembly.Location)!, "AI", "prompts");
+			return Path.Combine(Path.GetDirectoryName(typeof(AIPromptProvider).Assembly.Location)!, "prompts");
 		}
 	}
 }

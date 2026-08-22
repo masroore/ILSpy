@@ -217,6 +217,7 @@ namespace ICSharpCode.ILSpy.AI
 				Messages.Add(assistant);
 				requestId = Interlocked.Increment(ref requestGeneration);
 				requestConversation = loadedHistory.ActiveConversation;
+				requestConversation.Messages.Add(assistant);
 				requestMessages = Messages.Where(m => m.Content.Length != 0).Select(m => new LLMMessage(m.Role, m.Content)).ToArray();
 				requestContext = GetActiveContext(text);
 				IsBusy = true;
